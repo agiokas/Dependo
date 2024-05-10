@@ -25,7 +25,7 @@ final class DependoTests: XCTestCase {
     func testRegister_protocol_resolvable_nonoptional() throws {
         let dependo = Dependo()
         
-        dependo.register(SampleVM.self) { parameters in
+        dependo.register(SampleVM1.self) { parameters in
             SampleVM1(parameters: parameters)
         }
         let _: SampleVM1 = try dependo.resolve((uid: "abc", nid: 123))
