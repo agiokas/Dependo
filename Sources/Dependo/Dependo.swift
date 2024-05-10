@@ -19,7 +19,7 @@ open class Dependo {
         return value?.make(parameters: parameters)
     }
     
-    public func resolve<R>(_ parameters: R.Initializers) throws -> R? where R: Resolvable {
+    public func resolve<R>(_ parameters: R.Initializers) throws -> R where R: Resolvable {
         guard let result: R = optionalResolve(parameters) else {
             throw DependoError.notRegistered(type: String(describing: R.self))
         }
