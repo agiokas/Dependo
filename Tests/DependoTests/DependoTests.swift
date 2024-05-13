@@ -146,6 +146,15 @@ final class DependoTests: XCTestCase {
         }
         
         let _: ISmoVM = myDI.resolve(param: 1)
+        
+        let intValue: Int = myDI.resolve()
+        XCTAssertEqual(intValue, 10)
+
+        let doubleValue: Double = myDI.resolve()
+        XCTAssertEqual(doubleValue, 20)
+
+        let stringValue: String = myDI.resolve()
+        XCTAssertEqual(stringValue, "30")
     }
     
     func testMacro_thread_safety() {
@@ -187,4 +196,12 @@ final class SmoVM: ISmoVM {
 
 @register(parameters: Int.self, result: ISmoVM.self)
 final class SMyDI: Dependo {
+    
+    override init() {
+        super.init()
+        self.register(Int.self, { _ in Int(10) })
+            .register(Double.self, instance: 20)
+            .register(String.self, instance: "30")
+    }
+    
 }
