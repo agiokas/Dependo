@@ -13,14 +13,4 @@ class ResolvableCreator {
     func make(resolver: Resolver) -> Any {
         factory(resolver)
     }
-
-    func makeClosure<T>(resolver: Resolver, type _: T.Type) -> (() -> T) {
-        let theFactory = factory
-        return {
-            guard let result = theFactory(resolver) as? T else {
-                fatalError("Resolver failed to resolve")
-            }
-            return result
-        }
-    }
 }

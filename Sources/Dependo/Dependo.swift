@@ -23,7 +23,7 @@ public extension Resolver {
 
 open class Dependo: Resolver {
     private static let dispatchQueue = DispatchQueue(label: "Dependo.serial.queue", qos: .userInteractive)
-    private var resolvableFactories = [ObjectIdentifier: ResolvableCreator]()
+    private var storage = [ObjectIdentifier: ResolvableCreator]()
 
     public init() {}
 
@@ -56,7 +56,7 @@ open class Dependo: Resolver {
     }
     
     public func registeredEntities() -> [() -> Any?] {
-        resolvableFactories.map { _, factory in { factory.make(resolver: self) } }
+        storage.map { _, factory in { factory.make(resolver: self) } }
     }
     
     @discardableResult public func register<R>(_ factory: @escaping (Resolver) -> R) -> Self {
@@ -82,7 +82,7 @@ open class Dependo: Resolver {
     @discardableResult public func replace<R>(_ type: R.Type,
                                               _ factory: @escaping (Resolver) -> R) -> Self {
         threadSafe {
-            self.resolvableFactories[ObjectIdentifier(type)] = ResolvableCreator(for: type, factory)
+            self.storage[ObjectIdentifier(type)] = ResolvableCreator(for: type, factory)
         }
         return self
     }
@@ -98,7 +98,7 @@ open class Dependo: Resolver {
     
     private func getCreator(for type: Any.Type) -> ResolvableCreator? {
         let value: ResolvableCreator? = threadSafe {
-            self.resolvableFactories[ObjectIdentifier(type)]
+            self.storage[ObjectIdentifier(type)]
         }
         return value
     }
