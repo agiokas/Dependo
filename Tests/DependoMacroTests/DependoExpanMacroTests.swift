@@ -13,7 +13,7 @@ import XCTest
 import DependoMacros
 
 let testExpanMacros: [String: Macro.Type] = [
-    "register": DependoExpanMacro.self,
+    "declare": DependoExpanMacro.self,
 ]
 
 #endif
@@ -26,7 +26,7 @@ final class DependoExpanMacroTests: XCTestCase {
             protocol IVM {}
             class SomeVM: IVM {}
             
-            @register(parameters: Int.self, result: OtherClass.self)
+            @declare(parameters: Int.self, result: OtherClass.self)
             class ABC {
             
             }
@@ -80,7 +80,7 @@ final class DependoExpanMacroTests: XCTestCase {
             protocol IVM {}
             class SomeVM: IVM {}
             
-            @register(parameters: (p1: Int, p2: String).self, result: OtherClass.self)
+            @declare(parameters: (p1: Int, p2: String).self, result: OtherClass.self)
             class ABC {
             
             }

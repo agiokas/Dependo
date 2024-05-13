@@ -139,7 +139,7 @@ final class DependoTests: XCTestCase {
         wait(for: [someClassExp, someOtherClassExp, allResolveExp], timeout: 5)
     }
     
-    func testMacro_register_paremeter() {
+    func testMacro_declare_single_parameter() {
         let myDI = SMyDI()
         myDI.register { param, resolver in
             SmoVM(value: 1)
@@ -155,6 +155,19 @@ final class DependoTests: XCTestCase {
 
         let stringValue: String = myDI.resolve()
         XCTAssertEqual(stringValue, "30")
+    }
+    
+    func testMacro_declare_multiple_parameter() {
+        let myDI = SMyDI()
+        myDI.register { param, resolver in
+            SmoVM(value: 1)
+        }
+        myDI.replace { value, name, resolver in
+            SmoVM(value: value, name: name)
+        }
+        
+        let _: ISmoVM = myDI.resolve(param: 1)
+        let _: ISmoVM = myDI.resolve(value: 3, name: "Apo")
     }
     
     func testMacro_thread_safety() {
@@ -189,12 +202,20 @@ protocol ISmoVM {}
 
 final class SmoVM: ISmoVM {
     let value: Int
+    var name: String = ""
+    
     init(value: Int) {
         self.value = value
     }
+    
+    init(value: Int, name: String) {
+        self.value = value
+        self.name = name
+    }
 }
 
-@register(parameters: Int.self, result: ISmoVM.self)
+@declare(parameters: Int.self, result: ISmoVM.self)
+@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
 final class SMyDI: Dependo {
     
     override init() {
