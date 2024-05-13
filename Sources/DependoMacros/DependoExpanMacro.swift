@@ -7,6 +7,7 @@ import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
+import Foundation
 
 @main
 struct DIMacroPlugin: CompilerPlugin {
@@ -127,11 +128,20 @@ private func getResultType(_ node: SwiftSyntax.AttributeSyntax) throws -> String
     }
 }
 
-enum DIError: Error {
+enum DIError: Error, LocalizedError {
     case invalidParameters
     case invalidReturnType
     case unnamedTupleParameter
     case invalidTupleParameterType
+    
+    var errorDescription: String {
+        switch self {
+        case .invalidParameters: "Invalid Macro parameter(s)"
+        case .invalidReturnType: "Invalid return type"
+        case .invalidTupleParameterType: "Invalid tuple parameter"
+        case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
+        }
+    }
 }
  
 extension DependoExpanMacro: ExtensionMacro {
