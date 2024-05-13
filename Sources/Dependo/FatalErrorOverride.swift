@@ -19,7 +19,7 @@ struct FatalErrorOverride {
     }
 }
 
-func fatalError(_ message: @autoclosure () -> String = String(),
+func fatalError(_ message: @autoclosure () -> String,
               file: StaticString = #file,
               line: UInt = #line) -> Never {
     FatalErrorOverride.fatalErrorClosure(message(), file, line)
