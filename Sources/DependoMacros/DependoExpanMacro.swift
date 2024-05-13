@@ -45,15 +45,21 @@ public struct DependoExpanMacro: MemberMacro {
         func tryResolve(\(parameterList)) -> \(resultType)? { \(parameterName)?(\(unnamedParameterPassing), self) }
         """
         
+        
+        let replace = """
+        @discardableResult func replace(factory: @escaping (\(unnamedParameterList), _ resolver: Resolver) -> \(resultType)) -> Self {
+            threadSafe {
+                self.\(parameterName) = factory
+            }
+            return self
+        }
+        """
         let register = """
         @discardableResult func register(factory: @escaping (\(unnamedParameterList), _ resolver: Resolver) -> \(resultType)) -> Self {
             guard \(parameterName) == nil else {
                 fatalError("Type \(resultType) with parameters (\(parameterList)) already registered.")
             }
-            threadSafe {
-                self.\(parameterName) = factory
-            }
-            return self
+            return replace(factory: factory)
         }
         """
                 
@@ -61,6 +67,7 @@ public struct DependoExpanMacro: MemberMacro {
             DeclSyntax(stringLiteral: property),
             DeclSyntax(stringLiteral: tryResolve),
             DeclSyntax(stringLiteral: resolve),
+            DeclSyntax(stringLiteral: replace),
             DeclSyntax(stringLiteral: register)
         ]
     }

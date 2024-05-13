@@ -50,14 +50,18 @@ final class DependoExpanMacroTests: XCTestCase {
                     return result
                 }
 
-                @discardableResult func register(factory: @escaping (_ param: Int, _ resolver: Resolver) -> OtherClass) -> Self {
-                    guard paramInt_OtherClass == nil else {
-                        fatalError("Type OtherClass with parameters (param: Int) already registered.")
-                    }
+                @discardableResult func replace(factory: @escaping (_ param: Int, _ resolver: Resolver) -> OtherClass) -> Self {
                     threadSafe {
                         self.paramInt_OtherClass = factory
                     }
                     return self
+                }
+            
+                @discardableResult func register(factory: @escaping (_ param: Int, _ resolver: Resolver) -> OtherClass) -> Self {
+                    guard paramInt_OtherClass == nil else {
+                        fatalError("Type OtherClass with parameters (param: Int) already registered.")
+                    }
+                    return replace(factory: factory)
                 }
             
             }
@@ -100,14 +104,18 @@ final class DependoExpanMacroTests: XCTestCase {
                     return result
                 }
 
-                @discardableResult func register(factory: @escaping (_ p1: Int, _ p2: String, _ resolver: Resolver) -> OtherClass) -> Self {
-                    guard p1Int_p2String_OtherClass == nil else {
-                        fatalError("Type OtherClass with parameters (p1: Int, p2: String) already registered.")
-                    }
+                @discardableResult func replace(factory: @escaping (_ p1: Int, _ p2: String, _ resolver: Resolver) -> OtherClass) -> Self {
                     threadSafe {
                         self.p1Int_p2String_OtherClass = factory
                     }
                     return self
+                }
+            
+                @discardableResult func register(factory: @escaping (_ p1: Int, _ p2: String, _ resolver: Resolver) -> OtherClass) -> Self {
+                    guard p1Int_p2String_OtherClass == nil else {
+                        fatalError("Type OtherClass with parameters (p1: Int, p2: String) already registered.")
+                    }
+                    return replace(factory: factory)
                 }
             
             }

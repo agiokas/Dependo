@@ -148,24 +148,24 @@ final class DependoTests: XCTestCase {
         let _: ISmoVM = myDI.resolve(param: 1)
     }
     
-//    func testMacro_thread_safety() {
-//        let myDI = SMyDI()
-//        let iterations = 10000
-//        let expectation = expectation(description: "all done")
-//
-//        Task.detached(priority: .medium) {
-//            DispatchQueue.concurrentPerform(iterations: iterations) { _ in
-//                myDI.register { param, resolver in
-//                    SmoVM(value: 1)
-//                }
-//                let vm: ISmoVM = myDI.resolve(param: 1)
-//                XCTAssertNotNil(vm)
-//            }
-//            expectation.fulfill()
-//        }
-//        
-//        wait(for: [expectation], timeout: 5)
-//    }
+    func testMacro_thread_safety() {
+        let myDI = SMyDI()
+        let iterations = 10000
+        let expectation = expectation(description: "all done")
+
+        Task.detached(priority: .medium) {
+            DispatchQueue.concurrentPerform(iterations: iterations) { _ in
+                myDI.replace { param, resolver in
+                    SmoVM(value: 1)
+                }
+                let vm: ISmoVM = myDI.resolve(param: 1)
+                XCTAssertNotNil(vm)
+            }
+            expectation.fulfill()
+        }
+        
+        wait(for: [expectation], timeout: 5)
+    }
     
     private class SomeClass {
         var data = 1

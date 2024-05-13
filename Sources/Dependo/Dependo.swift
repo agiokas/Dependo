@@ -90,10 +90,8 @@ open class Dependo: Resolver {
     @discardableResult public func register<R>(_ type: R.Type, _ factory: @escaping (Resolver) -> R) -> Self {
         guard getCreator(for: type) == nil else {
             fatalError("Dependo: Type \(type) already registered.")
-        }
-        
-        replace(type.self, factory)
-        return self
+        }        
+        return replace(type.self, factory)
     }
     
     private func getCreator(for type: Any.Type) -> ResolvableCreator? {
