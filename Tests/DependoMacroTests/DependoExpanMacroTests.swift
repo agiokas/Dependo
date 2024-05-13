@@ -54,7 +54,9 @@ final class DependoExpanMacroTests: XCTestCase {
                     guard paramInt_OtherClass == nil else {
                         fatalError("Type OtherClass with parameters (param: Int) already registered.")
                     }
-                    paramInt_OtherClass = factory
+                    threadSafe {
+                        self.paramInt_OtherClass = factory
+                    }
                     return self
                 }
             
@@ -102,7 +104,9 @@ final class DependoExpanMacroTests: XCTestCase {
                     guard p1Int_p2String_OtherClass == nil else {
                         fatalError("Type OtherClass with parameters (p1: Int, p2: String) already registered.")
                     }
-                    p1Int_p2String_OtherClass = factory
+                    threadSafe {
+                        self.p1Int_p2String_OtherClass = factory
+                    }
                     return self
                 }
             

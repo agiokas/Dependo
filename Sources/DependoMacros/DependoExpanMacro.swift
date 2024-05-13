@@ -50,7 +50,9 @@ public struct DependoExpanMacro: MemberMacro {
             guard \(parameterName) == nil else {
                 fatalError("Type \(resultType) with parameters (\(parameterList)) already registered.")
             }
-            \(parameterName) = factory
+            threadSafe {
+                self.\(parameterName) = factory
+            }
             return self
         }
         """
