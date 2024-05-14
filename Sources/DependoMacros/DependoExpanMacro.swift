@@ -126,34 +126,34 @@ private func analyse(_ members: MemberAccessExprSyntax) throws -> [(name: String
 
 private func getResultType(_ node: SwiftSyntax.AttributeSyntax) throws -> String {
     guard let list = node.arguments else {
-        throw DIError.invalidReturnType
+        throw DIError.invalidResultType
     }
     switch list {
     case let .argumentList(listSyntax):
         guard let lastElement = listSyntax.last, lastElement.label?.text == "result" else {
-            throw DIError.invalidReturnType
+            throw DIError.invalidSyntax
         }
         guard let declReference = lastElement.expression.as(MemberAccessExprSyntax.self)?.base?.as(DeclReferenceExprSyntax.self) else {
-            throw DIError.invalidReturnType
+            throw DIError.invalidResultType
         }
         return declReference.baseName.text
     default:
-        throw DIError.invalidReturnType
+        throw DIError.invalidResultType
     }
 }
 
 enum DIError: Error, CustomStringConvertible {
     case notDependoSubclass
     case invalidSyntax
-    case invalidReturnType
+    case invalidResultType
     case unnamedTupleParameter
     case invalidTupleParameterType
     
     var description: String {
         switch self {
-        case .notDependoSubclass: "Macro @declare need to be used at a Dependo subclass"
+        case .notDependoSubclass: "Macro @declare need to be used at a Dependo subclass."
         case .invalidSyntax: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple."
-        case .invalidReturnType: "Invalid return type"
+        case .invalidResultType: "Invalid result type. Result type should not be Closures or other Tuples."
         case .invalidTupleParameterType: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples."
         case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
         }

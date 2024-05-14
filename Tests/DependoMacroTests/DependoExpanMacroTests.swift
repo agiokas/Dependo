@@ -204,7 +204,7 @@ final class DependoExpanMacroTests: XCTestCase {
             
             }
             """,
-            diagnostics: [.init(message: "Macro @declare need to be used at a Dependo subclass", line: 4, column: 1)],
+            diagnostics: [.init(message: "Macro @declare need to be used at a Dependo subclass.", line: 4, column: 1)],
             macros: testExpanMacros
         )
         #else
@@ -268,6 +268,34 @@ final class DependoExpanMacroTests: XCTestCase {
         #endif
     }
     
+    func testMacroDeclare_invalid_result_type_closure() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameters: Int.sef, result: ((Int)->Double).self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Invalid result type. Result type should not be Closures or other Tuples.", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
     func testMacroDeclare_invalid_result_type() throws {
         #if canImport(DependoMacros)
         assertMacroExpansion(
@@ -275,7 +303,7 @@ final class DependoExpanMacroTests: XCTestCase {
             protocol IVM {}
             class SomeVM: IVM {}
             
-            @declare(parameter: Int.sef, result: ((Int)->Double).self)
+            @declare(parameters: Int.sef, result2: Double.self)
             class ABC: Dependo {
             
             }

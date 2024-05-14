@@ -12,7 +12,7 @@ let package = Package(
         .library(name: "DependoMacro", targets: ["DependoMacro"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "510.0.2"),
     ],
     targets: [
         .target(name: "Dependo", dependencies: ["DependoMacro"]),
