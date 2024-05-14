@@ -17,9 +17,13 @@ struct DIMacroPlugin: CompilerPlugin {
 }
 
 public struct DependoExpanMacro: MemberMacro {
-    public static func expansion(of node: SwiftSyntax.AttributeSyntax,
-                                 providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax,
-                                 in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
+    public static func expansion(
+        of node: AttributeSyntax,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        conformingTo protocols: [TypeSyntax],
+        in context: some MacroExpansionContext
+    ) throws -> [DeclSyntax] {
+        try checkDependo(declaration: declaration)
         let parameters = try getParameters(node)
         let resultType = try getResultType(node)
 
@@ -28,11 +32,11 @@ public struct DependoExpanMacro: MemberMacro {
         let parameterName = parameters.map { "\($0.name)\($0.type)" }.joined(separator: "_") + "_\(resultType)"
         let parameterPassing = parameters.map { "\($0.name): \($0.name)" }.joined(separator: ", ")
         let unnamedParameterPassing = parameters.map { "\($0.name)" }.joined(separator: ", ")
-        
+
         let property = """
         private var \(parameterName): ((\(unnamedParameterList), _ resolver: Resolver) -> \(resultType))?
         """
-        
+
         let resolve = """
         func resolve(\(parameterList)) -> \(resultType) {
             guard let result: \(resultType) = tryResolve(\(parameterPassing)) else {
@@ -41,12 +45,11 @@ public struct DependoExpanMacro: MemberMacro {
             return result
         }
         """
-        
+
         let tryResolve = """
         func tryResolve(\(parameterList)) -> \(resultType)? { \(parameterName)?(\(unnamedParameterPassing), self) }
         """
-        
-        
+
         let replace = """
         @discardableResult func replace(factory: @escaping (\(unnamedParameterList), _ resolver: Resolver) -> \(resultType)) -> Self {
             threadSafe {
@@ -63,7 +66,7 @@ public struct DependoExpanMacro: MemberMacro {
             return replace(factory: factory)
         }
         """
-                
+
         return [
             DeclSyntax(stringLiteral: property),
             DeclSyntax(stringLiteral: tryResolve),
@@ -74,21 +77,32 @@ public struct DependoExpanMacro: MemberMacro {
     }
 }
 
+private func checkDependo(declaration: some SwiftSyntax.DeclGroupSyntax) throws {
+    guard let inheritanceClause = declaration.inheritanceClause else {
+        throw DIError.notDependoSubclass
+    }
+    guard inheritanceClause.inheritedTypes.contains(where: { inheritance in
+        inheritance.type.as(IdentifierTypeSyntax.self)?.name.text == "Dependo"
+    }) else {
+        throw DIError.notDependoSubclass
+    }
+}
+
 private func getParameters(_ node: SwiftSyntax.AttributeSyntax) throws -> [(name: String, type: String)] {
     guard let list = node.arguments else {
-        throw DIError.invalidParameters
+        throw DIError.invalidSyntax
     }
     switch list {
     case let .argumentList(listSyntax):
         guard let firstElement = listSyntax.first, firstElement.label?.text == "parameters" else {
-            throw DIError.invalidParameters
+            throw DIError.invalidSyntax
         }
         guard let parameters = firstElement.expression.as(MemberAccessExprSyntax.self) else {
-            throw DIError.invalidParameters
+            throw DIError.invalidSyntax
         }
         return try analyse(parameters)
     default:
-        throw DIError.invalidParameters
+        throw DIError.invalidSyntax
     }
 }
 
@@ -107,7 +121,7 @@ private func analyse(_ members: MemberAccessExprSyntax) throws -> [(name: String
             return (name, type)
         }
     }
-    throw DIError.invalidParameters
+    throw DIError.invalidSyntax
 }
 
 private func getResultType(_ node: SwiftSyntax.AttributeSyntax) throws -> String {
@@ -128,29 +142,20 @@ private func getResultType(_ node: SwiftSyntax.AttributeSyntax) throws -> String
     }
 }
 
-enum DIError: Error, LocalizedError {
-    case invalidParameters
+enum DIError: Error, CustomStringConvertible {
+    case notDependoSubclass
+    case invalidSyntax
     case invalidReturnType
     case unnamedTupleParameter
     case invalidTupleParameterType
     
-    var errorDescription: String {
+    var description: String {
         switch self {
-        case .invalidParameters: "Invalid Macro parameter(s)"
+        case .notDependoSubclass: "Macro @declare need to be used at a Dependo subclass"
+        case .invalidSyntax: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple."
         case .invalidReturnType: "Invalid return type"
-        case .invalidTupleParameterType: "Invalid tuple parameter"
+        case .invalidTupleParameterType: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples."
         case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
         }
     }
 }
- 
-extension DependoExpanMacro: ExtensionMacro {
-    public static func expansion(of node: SwiftSyntax.AttributeSyntax,
-                                 attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
-                                 providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
-                                 conformingTo protocols: [SwiftSyntax.TypeSyntax],
-                                 in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
-        []
-    }
-}
-

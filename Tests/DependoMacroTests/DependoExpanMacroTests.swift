@@ -19,15 +19,15 @@ let testExpanMacros: [String: Macro.Type] = [
 #endif
 
 final class DependoExpanMacroTests: XCTestCase {
-    func testMacroRegisterOneParameter() throws {
+    func testMacroDeclare_wrong_parameter_syntax() throws {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
             protocol IVM {}
             class SomeVM: IVM {}
             
-            @declare(parameters: Int.self, result: OtherClass.self)
-            class ABC {
+            @declare(p: Int.sef, result: OtherClass.self)
+            class ABC: Dependo {
             
             }
             """,
@@ -35,7 +35,64 @@ final class DependoExpanMacroTests: XCTestCase {
             """
             protocol IVM {}
             class SomeVM: IVM {}
-            class ABC {
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple.", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_wrong_result_syntax() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameter: Int.sef, r: OtherClass.self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple.", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    
+    func testMacroDeclareOneParameter() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameters: Int.self, result: OtherClass.self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
             
                 private var paramInt_OtherClass: ((_ param: Int, _ resolver: Resolver) -> OtherClass)?
 
@@ -73,7 +130,7 @@ final class DependoExpanMacroTests: XCTestCase {
         #endif
     }
     
-    func testMacroRegisterTuple() throws {
+    func testMacroDeclareTuple() throws {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
@@ -81,7 +138,7 @@ final class DependoExpanMacroTests: XCTestCase {
             class SomeVM: IVM {}
             
             @declare(parameters: (p1: Int, p2: String).self, result: OtherClass.self)
-            class ABC {
+            class ABC: Dependo {
             
             }
             """,
@@ -89,7 +146,7 @@ final class DependoExpanMacroTests: XCTestCase {
             """
             protocol IVM {}
             class SomeVM: IVM {}
-            class ABC {
+            class ABC: Dependo {
             
                 private var p1Int_p2String_OtherClass: ((_ p1: Int, _ p2: String, _ resolver: Resolver) -> OtherClass)?
 
@@ -120,6 +177,118 @@ final class DependoExpanMacroTests: XCTestCase {
             
             }
             """,
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_on_non_Dependo_class() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameters: (p1: Int, p2: String).self, result: OtherClass.self)
+            class ABC {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Macro @declare need to be used at a Dependo subclass", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_invalid_tuple_arguments() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameters: (p1: () -> Int, p2: String).self, result: OtherClass.self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples.", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_unnamed_tuple_arguments() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameters: (Int, String).self, result: OtherClass.self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)", line: 4, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_invalid_result_type() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            
+            @declare(parameter: Int.sef, result: ((Int)->Double).self)
+            class ABC: Dependo {
+            
+            }
+            """,
+            expandedSource:
+            """
+            protocol IVM {}
+            class SomeVM: IVM {}
+            class ABC: Dependo {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple.", line: 4, column: 1)],
             macros: testExpanMacros
         )
         #else

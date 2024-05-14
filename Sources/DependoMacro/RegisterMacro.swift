@@ -9,4 +9,4 @@
 /// @declare(parameters: (age: Int, name: String).self, result: ResultType.self)
 /// ```
 @attached(member, names: arbitrary)
-public macro declare<P1, T>(parameters: P1.Type, result: T.Type) = #externalMacro(module: "DependoMacros", type: "DependoExpanMacro")
+public macro declare<P, T>(parameters: P.Type, result: T.Type) = #externalMacro(module: "DependoMacros", type: "DependoExpanMacro")
