@@ -50,8 +50,14 @@ open class Dependo: Resolver {
     private var storage = [ObjectIdentifier: ResolvableCreator]()
     
     /// Initializes a new instance of `Dependo`.
-    public init() {}
+    public init() {
+        configure()
+    }
 
+    /// the `configure` function is called from the default initializer .
+    /// Override it if needed in order to add possible configuration.
+    public func configure() {}
+    
     /// Resolves an instance of a given type.
     /// A `fatal error` would be thrown if  the `type` is not registered
     ///

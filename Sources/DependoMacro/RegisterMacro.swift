@@ -10,3 +10,6 @@
 /// ```
 @attached(member, names: arbitrary)
 public macro declare<P, T>(parameters: P.Type, result: T.Type) = #externalMacro(module: "DependoMacros", type: "DependoExpanMacro")
+
+@attached(member, names: arbitrary)
+public macro resolveSource() = #externalMacro(module: "DependoMacros", type: "ResolveSourceMacro")

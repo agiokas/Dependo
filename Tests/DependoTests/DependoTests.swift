@@ -189,6 +189,12 @@ final class DependoTests: XCTestCase {
         wait(for: [expectation], timeout: 5)
     }
     
+    func testSingletonInitialization() {
+        let di = SMyDI2()
+        
+        XCTAssertTrue(di === SMyDI2.shared)
+    }
+    
     private class SomeClass {
         var data = 1
     }
@@ -214,6 +220,7 @@ final class SmoVM: ISmoVM {
     }
 }
 
+
 @declare(parameters: Int.self, result: ISmoVM.self)
 @declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
 final class SMyDI: Dependo {
@@ -225,4 +232,10 @@ final class SMyDI: Dependo {
             .register(String.self, instance: "30")
     }
     
+}
+
+@resolveSource()
+@declare(parameters: Int.self, result: ISmoVM.self)
+@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
+final class SMyDI2: Dependo {
 }

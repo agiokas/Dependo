@@ -188,9 +188,6 @@ final class DependoExpanMacroTests: XCTestCase {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
-            
             @declare(parameters: (p1: Int, p2: String).self, result: OtherClass.self)
             class ABC {
             
@@ -198,13 +195,11 @@ final class DependoExpanMacroTests: XCTestCase {
             """,
             expandedSource:
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
             class ABC {
             
             }
             """,
-            diagnostics: [.init(message: "Macro @declare need to be used at a Dependo subclass.", line: 4, column: 1)],
+            diagnostics: [.init(message: "Macro should be used on a Dependo subclass.", line: 1, column: 1)],
             macros: testExpanMacros
         )
         #else
@@ -216,9 +211,6 @@ final class DependoExpanMacroTests: XCTestCase {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
-            
             @declare(parameters: (p1: () -> Int, p2: String).self, result: OtherClass.self)
             class ABC: Dependo {
             
@@ -226,13 +218,11 @@ final class DependoExpanMacroTests: XCTestCase {
             """,
             expandedSource:
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
             class ABC: Dependo {
             
             }
             """,
-            diagnostics: [.init(message: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples.", line: 4, column: 1)],
+            diagnostics: [.init(message: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples.", line: 1, column: 1)],
             macros: testExpanMacros
         )
         #else
@@ -244,9 +234,6 @@ final class DependoExpanMacroTests: XCTestCase {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
-            
             @declare(parameters: (Int, String).self, result: OtherClass.self)
             class ABC: Dependo {
             
@@ -254,13 +241,11 @@ final class DependoExpanMacroTests: XCTestCase {
             """,
             expandedSource:
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
             class ABC: Dependo {
             
             }
             """,
-            diagnostics: [.init(message: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)", line: 4, column: 1)],
+            diagnostics: [.init(message: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)", line: 1, column: 1)],
             macros: testExpanMacros
         )
         #else
@@ -272,9 +257,6 @@ final class DependoExpanMacroTests: XCTestCase {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
-            
             @declare(parameters: Int.sef, result: ((Int)->Double).self)
             class ABC: Dependo {
             
@@ -282,13 +264,34 @@ final class DependoExpanMacroTests: XCTestCase {
             """,
             expandedSource:
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
             class ABC: Dependo {
             
             }
             """,
-            diagnostics: [.init(message: "Invalid result type. Result type should not be Closures or other Tuples.", line: 4, column: 1)],
+            diagnostics: [.init(message: "Invalid result type. Result type should not be Closures or other Tuples.", line: 1, column: 1)],
+            macros: testExpanMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func testMacroDeclare_no_dependo_subclass() throws {
+        #if canImport(DependoMacros)
+        assertMacroExpansion(
+            """
+            @declare(parameters: Int.sef, result: ((Int)->Double).self)
+            class ABC: Dependo2 {
+            
+            }
+            """,
+            expandedSource:
+            """
+            class ABC: Dependo2 {
+            
+            }
+            """,
+            diagnostics: [.init(message: "Macro should be used on a Dependo subclass.", line: 1, column: 1)],
             macros: testExpanMacros
         )
         #else
@@ -300,9 +303,6 @@ final class DependoExpanMacroTests: XCTestCase {
         #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
-            
             @declare(parameters: Int.sef, result2: Double.self)
             class ABC: Dependo {
             
@@ -310,13 +310,11 @@ final class DependoExpanMacroTests: XCTestCase {
             """,
             expandedSource:
             """
-            protocol IVM {}
-            class SomeVM: IVM {}
             class ABC: Dependo {
             
             }
             """,
-            diagnostics: [.init(message: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple.", line: 4, column: 1)],
+            diagnostics: [.init(message: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple.", line: 1, column: 1)],
             macros: testExpanMacros
         )
         #else

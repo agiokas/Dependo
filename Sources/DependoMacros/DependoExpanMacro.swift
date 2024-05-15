@@ -12,7 +12,8 @@ import Foundation
 @main
 struct DIMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        DependoExpanMacro.self
+        DependoExpanMacro.self,
+        ResolveSourceMacro.self
     ]
 }
 
@@ -77,7 +78,7 @@ public struct DependoExpanMacro: MemberMacro {
     }
 }
 
-private func checkDependo(declaration: some SwiftSyntax.DeclGroupSyntax) throws {
+func checkDependo(declaration: some SwiftSyntax.DeclGroupSyntax) throws {
     guard let inheritanceClause = declaration.inheritanceClause else {
         throw DIError.notDependoSubclass
     }
@@ -148,14 +149,16 @@ enum DIError: Error, CustomStringConvertible {
     case invalidResultType
     case unnamedTupleParameter
     case invalidTupleParameterType
-    
+    case invalidClass
+
     var description: String {
         switch self {
-        case .notDependoSubclass: "Macro @declare need to be used at a Dependo subclass."
+        case .notDependoSubclass: "Macro should be used on a Dependo subclass."
         case .invalidSyntax: "Invalid Syntax. Currect syntax is `@declare<P, T>(parameters: P1.Type, result: T.Type)`. P can be a normal type or a tuple."
         case .invalidResultType: "Invalid result type. Result type should not be Closures or other Tuples."
         case .invalidTupleParameterType: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples."
         case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
+        case .invalidClass: "Macro should be used on a subclass of Dependo."
         }
     }
 }
