@@ -24,6 +24,7 @@ let package = Package(
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
+        .executableTarget(name: "DependoExample", dependencies: ["Dependo"]),
         .testTarget(name: "DependoTests", dependencies: ["Dependo", "DependoMacro"]),
         .testTarget(name: "DependoMacroTests",
                     dependencies: [
