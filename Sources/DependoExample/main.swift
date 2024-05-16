@@ -30,9 +30,18 @@ protocol ICalculateComplexStuffUseCase {}
 
 final class CalculateComplexStuffUseCase: ICalculateComplexStuffUseCase {}
 
+//@sharedDependo()
 @declare(parameters: String.self, result: MainScreenViewModelProtocol.self)
 @declare(parameters: (deviceId: String, userName: String).self, result: MainScreenViewModelProtocol.self)
-final class DI: Dependo { }
+final class DI: Dependo {
+    private static var _shared: DI?
+    static var shared: DI { _shared ?? DI() }
+    
+    override init() {
+        super.init()
+        Self._shared = self
+    }
+}
 
 let di = DI()
     .register { param, _ in MainScreenViewModel(deviceId: param) }
@@ -46,3 +55,12 @@ let calcUseCase: ICalculateComplexStuffUseCase = di.resolve()
 print("ViewModel 1:\(type(of: vm1))")
 print("ViewModel 2:\(type(of: vm2))")
 print("Use case   :\(type(of: calcUseCase))")
+
+let k: ICalculateComplexStuffUseCase = #resolve(DI.self)
+
+print("k   :\(type(of: k))")
+
+class AVC {
+    let vm: MainScreenViewModelProtocol = DI.shared.resolve(param: "abc")
+    let uc: ICalculateComplexStuffUseCase = #resolve(DI.self)
+}

@@ -195,6 +195,14 @@ final class DependoTests: XCTestCase {
         XCTAssertTrue(di === SMyDI2.shared)
     }
     
+    func testInject() {
+        _ = SMyDI2()
+            .register(SomeClass.self) { _ in SomeClass() }
+            .register(SomeOtherClass.self) { _ in SomeOtherClass() }
+                
+        let _: SomeClass = #resolve(SMyDI2.self)
+    }
+    
     private class SomeClass {
         var data = 1
     }
@@ -234,7 +242,7 @@ final class SMyDI: Dependo {
     
 }
 
-@resolveSource()
+@sharedDependo()
 @declare(parameters: Int.self, result: ISmoVM.self)
 @declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
 final class SMyDI2: Dependo {

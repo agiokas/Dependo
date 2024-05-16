@@ -12,19 +12,19 @@ import XCTest
 #if canImport(DependoMacros)
 import DependoMacros
 
-let testResolveSourceMacros: [String: Macro.Type] = [
-    "resolveSource": ResolveSourceMacro.self,
+let testSharedMacro: [String: Macro.Type] = [
+    "sharedDependo": SharedMacro.self,
 ]
 
 #endif
 
 
-final class ResolveSourceMacroTests: XCTestCase {
+final class SharedMacroTests: XCTestCase {
     func testResolveSourceMacro() throws {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            @resolveSource()
+            @sharedDependo()
             class ABC: Dependo {
             
             }
@@ -33,17 +33,18 @@ final class ResolveSourceMacroTests: XCTestCase {
             """
             class ABC: Dependo {
             
-                static var shared = Dependo()
-            
+                private static var _shared: ABC?
+                static var shared: ABC { _shared ?? ABC() }
+
                 override init() {
                     super.init()
-                    Self.shared = self
+                    Self._shared = self
                 }
             
             }
             """,
             diagnostics: [],
-            macros: testResolveSourceMacros
+            macros: testSharedMacro
         )
 #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -54,7 +55,7 @@ final class ResolveSourceMacroTests: XCTestCase {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            @resolveSource()
+            @sharedDependo()
             struct ABC {}
             """,
             expandedSource:
@@ -62,7 +63,7 @@ final class ResolveSourceMacroTests: XCTestCase {
             struct ABC {}
             """,
             diagnostics: [.init(message: "Macro should be used on a Dependo subclass.", line: 1, column: 1)],
-            macros: testResolveSourceMacros
+            macros: testSharedMacro
         )
 #else
         throw XCTSkip("macros are only supported when running tests for the host platform")

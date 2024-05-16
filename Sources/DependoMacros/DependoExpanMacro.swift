@@ -13,7 +13,8 @@ import Foundation
 struct DIMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         DependoExpanMacro.self,
-        ResolveSourceMacro.self
+        SharedMacro.self,
+        ResolveMacro.self
     ]
 }
 
@@ -150,6 +151,8 @@ enum DIError: Error, CustomStringConvertible {
     case unnamedTupleParameter
     case invalidTupleParameterType
     case invalidClass
+    case invalidInjectDependo
+    case sharedMacroInvalidClass
 
     var description: String {
         switch self {
@@ -159,6 +162,8 @@ enum DIError: Error, CustomStringConvertible {
         case .invalidTupleParameterType: "Invalid tuple parameters. Tuple parameters should not be Closures or other Tuples."
         case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
         case .invalidClass: "Macro should be used on a subclass of Dependo."
+        case .invalidInjectDependo: "#resolve(param.Type) should get a Dependo subclass Type as a parameter."
+        case .sharedMacroInvalidClass: "@sharedDependo should be used on a Dependo subclass."
         }
     }
 }

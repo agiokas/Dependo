@@ -9,7 +9,7 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 import Foundation
 
-public struct ResolveSourceMacro: MemberMacro {
+public struct SharedMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -17,15 +17,17 @@ public struct ResolveSourceMacro: MemberMacro {
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         try checkDependo(declaration: declaration)
+        let name = try getType(declaration)
         
         let sharedInstance = """
-            static var shared = Dependo()
+            private static var _shared: \(name)?
+        static var shared: \(name) { _shared ?? \(name)() }
         """
         
         let initializer = """
         override init() {
             super.init()
-            Self.shared = self
+            Self._shared = self
         }
         """
         
@@ -34,4 +36,12 @@ public struct ResolveSourceMacro: MemberMacro {
             DeclSyntax(stringLiteral: initializer),
         ]
     }
+    
+    static func getType(_ declaration: some DeclGroupSyntax) throws -> String {
+        guard let name = declaration.as(ClassDeclSyntax.self)?.name.text else {
+            throw DIError.sharedMacroInvalidClass
+        }
+        return name
+    }
 }
+
