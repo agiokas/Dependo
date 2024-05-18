@@ -18,12 +18,16 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build
       run: swift build -v
-    - name: Run tests
+    - name: Run Dependo tests
       run: swift test --enable-code-coverage
-    - name: Prepare Code Coverage
-      run: xcrun llvm-cov export -format="lcov" .build/debug/DependoPackageTests.xctest/Contents/MacOS/DependoPackageTests  -instr-profile .build/debug/codecov/default.profdata > info.lcov
+    - name: Prepare Code Coverage for Dependo
+      run: xcrun llvm-cov export -format="lcov" .build/debug/DependoPackageTests.xctest/Contents/MacOS/DependoPackageTests  -instr-profile .build/debug/codecov/default.profdata > dependo.lcov
+    - name: Run Dependo Example tests
+      run: (cd Examples; swift test --enable-code-coverage)
+    - name: Prepare Code Coverage for Dependo Example
+      run: xcrun llvm-cov export -format="lcov" .Example/.build/debug/ExamplePackageTests.xctest/Contents/MacOS/ExamplePackageTests  -instr-profile .build/debug/codecov/default.profdata > example.lcov
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: info.lcov
+        files: dependo.lcov, example

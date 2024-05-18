@@ -3,17 +3,16 @@
 //  Copyright © 2024 Apostolos Giokas. All rights reserved.
 //  
 
+import Foundation
 import SwiftCompilerPlugin
 import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
-import Foundation
 
-public struct ResolveMacro: ExpressionMacro {
-    public static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax, 
-                                 in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> SwiftSyntax.ExprSyntax {
+public struct CreateGlobalResolverMacro: DeclarationMacro {
+    public static func expansion(of node: some SwiftSyntax.FreestandingMacroExpansionSyntax, in context: some SwiftSyntaxMacros.MacroExpansionContext) throws -> [SwiftSyntax.DeclSyntax] {
         let di = try getDependoSubclass(node: node)
-        return ExprSyntax(stringLiteral: "\(di).shared.resolve()")
+        return [DeclSyntax(stringLiteral: wrapper(name: di))]
     }
     
     private static func getDependoSubclass(node: some SwiftSyntax.FreestandingMacroExpansionSyntax) throws -> String {
@@ -29,4 +28,12 @@ public struct ResolveMacro: ExpressionMacro {
         
         return basename.text
     }
+    
+    private static func wrapper(name: String) -> String {
+    """
+    let DI = { \(name).shared }()
+    """
+    }
 }
+
+

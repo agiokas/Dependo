@@ -13,7 +13,7 @@ import XCTest
 import DependoMacros
 
 let testSharedMacro: [String: Macro.Type] = [
-    "sharedDependo": SharedMacro.self,
+    "shared": SharedMacro.self,
 ]
 
 #endif
@@ -24,7 +24,7 @@ final class SharedMacroTests: XCTestCase {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            @sharedDependo()
+            @shared()
             class ABC: Dependo {
             
             }
@@ -34,9 +34,12 @@ final class SharedMacroTests: XCTestCase {
             class ABC: Dependo {
             
                 private static var _shared: ABC?
-                static var shared: ABC { _shared ?? ABC() }
+            
+                static var shared: ABC {
+                    _shared ?? ABC()
+                }
 
-                override init() {
+                @discardableResult override init() {
                     super.init()
                     Self._shared = self
                 }
@@ -55,7 +58,7 @@ final class SharedMacroTests: XCTestCase {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             """
-            @sharedDependo()
+            @shared()
             struct ABC {}
             """,
             expandedSource:

@@ -2,6 +2,26 @@ import XCTest
 import Dependo
 import DependoMacro
 
+@declare(parameters: Int.self, result: ISmoVM.self)
+@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
+@shared
+final class SMyDI: Dependo {
+    static func create() -> SMyDI {
+        SMyDI()
+            .register(Int.self, { _ in Int(10) })
+            .register(Double.self, instance: 20)
+            .register(String.self, instance: "30")
+    }
+    
+}
+
+@shared()
+@declare(parameters: Int.self, result: ISmoVM.self)
+@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
+final class SMyDI2: Dependo {}
+
+#createGlobalResolver(SMyDI2.self)
+
 final class DependoTests: XCTestCase {
     func testRegister_and_resolve() {
         let container = Dependo()
@@ -140,10 +160,8 @@ final class DependoTests: XCTestCase {
     }
     
     func testMacro_declare_single_parameter() {
-        let myDI = SMyDI()
-        myDI.register { param, resolver in
-            SmoVM(value: 1)
-        }
+        let myDI = SMyDI.create()
+            .register { param, resolver in SmoVM(value: 1) }
         
         let _: ISmoVM = myDI.resolve(param: 1)
         
@@ -158,20 +176,16 @@ final class DependoTests: XCTestCase {
     }
     
     func testMacro_declare_multiple_parameter() {
-        let myDI = SMyDI()
-        myDI.register { param, resolver in
-            SmoVM(value: 1)
-        }
-        myDI.replace { value, name, resolver in
-            SmoVM(value: value, name: name)
-        }
+        let myDI = SMyDI.create()
+            .register { param, resolver in SmoVM(value: 1) }
+            .replace { value, name, resolver in SmoVM(value: value, name: name) }
         
         let _: ISmoVM = myDI.resolve(param: 1)
         let _: ISmoVM = myDI.resolve(value: 3, name: "Apo")
     }
     
     func testMacro_thread_safety() {
-        let myDI = SMyDI()
+        let myDI = SMyDI.create()
         let iterations = 10000
         let expectation = expectation(description: "all done")
 
@@ -200,7 +214,8 @@ final class DependoTests: XCTestCase {
             .register(SomeClass.self) { _ in SomeClass() }
             .register(SomeOtherClass.self) { _ in SomeOtherClass() }
                 
-        let _: SomeClass = #resolve(SMyDI2.self)
+        let someClass: SomeClass = DI.resolve()
+        XCTAssertNotNil(someClass)
     }
     
     private class SomeClass {
@@ -226,24 +241,4 @@ final class SmoVM: ISmoVM {
         self.value = value
         self.name = name
     }
-}
-
-
-@declare(parameters: Int.self, result: ISmoVM.self)
-@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
-final class SMyDI: Dependo {
-    
-    override init() {
-        super.init()
-        self.register(Int.self, { _ in Int(10) })
-            .register(Double.self, instance: 20)
-            .register(String.self, instance: "30")
-    }
-    
-}
-
-@sharedDependo()
-@declare(parameters: Int.self, result: ISmoVM.self)
-@declare(parameters: (value: Int, name: String).self, result: ISmoVM.self)
-final class SMyDI2: Dependo {
 }

@@ -30,20 +30,14 @@ protocol ICalculateComplexStuffUseCase {}
 
 final class CalculateComplexStuffUseCase: ICalculateComplexStuffUseCase {}
 
-//@sharedDependo()
 @declare(parameters: String.self, result: MainScreenViewModelProtocol.self)
 @declare(parameters: (deviceId: String, userName: String).self, result: MainScreenViewModelProtocol.self)
-final class DI: Dependo {
-    private static var _shared: DI?
-    static var shared: DI { _shared ?? DI() }
-    
-    override init() {
-        super.init()
-        Self._shared = self
-    }
-}
+@shared()
+final class MyDI: Dependo {}
 
-let di = DI()
+#createGlobalResolver(MyDI.self)
+
+let di = MyDI()
     .register { param, _ in MainScreenViewModel(deviceId: param) }
     .register(ICalculateComplexStuffUseCase.self) { _ in CalculateComplexStuffUseCase() }
     .register { deviceId, userName, _ in MainScreenViewModel2(deviceId: deviceId, userName: userName) }
@@ -56,11 +50,16 @@ print("ViewModel 1:\(type(of: vm1))")
 print("ViewModel 2:\(type(of: vm2))")
 print("Use case   :\(type(of: calcUseCase))")
 
-let k: ICalculateComplexStuffUseCase = #resolve(DI.self)
-
-print("k   :\(type(of: k))")
+let avc = AVC()
+avc.run()
 
 class AVC {
-    let vm: MainScreenViewModelProtocol = DI.shared.resolve(param: "abc")
-    let uc: ICalculateComplexStuffUseCase = #resolve(DI.self)
+    let vm: MainScreenViewModelProtocol = MyDI.shared.resolve(param: "abc")
+    let uc: ICalculateComplexStuffUseCase = DI.resolve()
+    
+    func run() {
+        let k: ICalculateComplexStuffUseCase = DI.resolve()
+        print("k   :\(type(of: k))")
+        print("uc   :\(type(of: uc))")
+    }
 }

@@ -12,56 +12,58 @@ import XCTest
 #if canImport(DependoMacros)
 import DependoMacros
 
-let testInjectMacros: [String: Macro.Type] = [
-    "resolve": ResolveMacro.self,
+let testCreateGlobalResolverMacroMacros: [String: Macro.Type] = [
+    "createGlobalResolver": CreateGlobalResolverMacro.self,
 ]
 
 #endif
 
 
-final class InjectMacroTests: XCTestCase {
-    func testInject() throws {
+final class CreateGlobalResolverMacroTests: XCTestCase {
+    func testResolve() throws {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             #"""
-            @resolveSource()
+            @shared()
             final class SMyDI2: Dependo {}
             
-            let k: ABC = #resolve(SMyDI2.self)
+            #createGlobalResolver(SMyDI2.self)
             """#,
             expandedSource:
             #"""
-            @resolveSource()
+            @shared()
             final class SMyDI2: Dependo {}
             
-            let k: ABC = SMyDI2.shared.resolve()
+            let DI = {
+                SMyDI2.shared
+            }()
             """#,
             diagnostics: [],
-            macros: testInjectMacros
+            macros: testCreateGlobalResolverMacroMacros
         )
 #else
         throw XCTSkip("macros are only supported when running tests for the host platform")
 #endif
     }
     
-    func testInject_invalid_class() throws {
+    func testResolve_invalid_class() throws {
 #if canImport(DependoMacros)
         assertMacroExpansion(
             #"""
-            @resolveSource()
+            @shared()
             final class SMyDI2: Dependo {}
             
-            let k: ABC = #resolve(SMyDI2)
+            #createGlobalResolver(SMyDI2)
             """#,
             expandedSource:
             #"""
-            @resolveSource()
+            @shared()
             final class SMyDI2: Dependo {}
             
-            let k: ABC = #resolve(SMyDI2)
+            #createGlobalResolver(SMyDI2)
             """#,
-            diagnostics: [.init(message: "#resolve(param.Type) should get a Dependo subclass Type as a parameter.", line: 4, column: 14)],
-            macros: testInjectMacros
+            diagnostics: [.init(message: "#resolve(param.Type) should get a Dependo subclass Type as a parameter.", line: 4, column: 1)],
+            macros: testCreateGlobalResolverMacroMacros
         )
 #else
         throw XCTSkip("macros are only supported when running tests for the host platform")

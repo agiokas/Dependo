@@ -14,23 +14,25 @@ public macro declare<P, T>(parameters: P.Type, result: T.Type) = #externalMacro(
 /// Declare a `Dependo` subclass as shared. This would allow this subclass to inject entities using the #resolve macro.
 /// # Example #
 /// ```
-/// @sharedDependo()
+/// @shared()
 /// final class MyDI: Dependo {}
 /// ```
 @attached(member, names: arbitrary)
-public macro sharedDependo() = #externalMacro(module: "DependoMacros", type: "SharedMacro")
+public macro shared() = #externalMacro(module: "DependoMacros", type: "SharedMacro")
 
-/// `#resolve` uses the specified subclass of `Dependo` to inject entities. This `Dependo` subclass first needs to be marked as `@sharedDependo()`
+/// `#createGlobalResolver` would a property named  `DI`  for the specified Dependo subclass`
 /// # Example #
 /// ```
-/// @sharedDependo()
+/// @shared()
 /// final class MyDI: Dependo {}
 ///
 /// MyDI()
 ///     .register(MyUseCase.self) { _ in MyUseCaseImplementation() }
 ///
-/// let myUseCase: MyUseCase = #resolve(MyDI.self)
+/// #createProperty(MyDI.self)
+///
+/// let myUC: MyUseCase = DI.resolve()
 ///
 /// ```
-@freestanding(expression)
-public macro resolve<T, R>(_ type: T.Type) -> R = #externalMacro(module: "DependoMacros", type: "ResolveMacro")
+@freestanding(declaration, names: named(DI))
+public macro createGlobalResolver<T>(_ type: T.Type) = #externalMacro(module: "DependoMacros", type: "CreateGlobalResolverMacro")

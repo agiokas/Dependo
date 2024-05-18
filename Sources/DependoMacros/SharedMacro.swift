@@ -19,20 +19,21 @@ public struct SharedMacro: MemberMacro {
         try checkDependo(declaration: declaration)
         let name = try getType(declaration)
         
-        let sharedInstance = """
-            private static var _shared: \(name)?
+        let privateSharedProperty = "private static var _shared: \(name)?"
+        let shared = """
         static var shared: \(name) { _shared ?? \(name)() }
         """
         
         let initializer = """
-        override init() {
+        @discardableResult override init() {
             super.init()
             Self._shared = self
         }
         """
         
         return [
-            DeclSyntax(stringLiteral: sharedInstance),
+            DeclSyntax(stringLiteral: privateSharedProperty),
+            DeclSyntax(stringLiteral: shared),
             DeclSyntax(stringLiteral: initializer),
         ]
     }

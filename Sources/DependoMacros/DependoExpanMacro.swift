@@ -14,7 +14,7 @@ struct DIMacroPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
         DependoExpanMacro.self,
         SharedMacro.self,
-        ResolveMacro.self
+        CreateGlobalResolverMacro.self
     ]
 }
 
@@ -31,7 +31,10 @@ public struct DependoExpanMacro: MemberMacro {
 
         let parameterList = parameters.map { "\($0.name): \($0.type)" }.joined(separator: ", ")
         let unnamedParameterList = parameters.map { "_ \($0.name): \($0.type)" }.joined(separator: ", ")
-        let parameterName = parameters.map { "\($0.name)\($0.type)" }.joined(separator: "_") + "_\(resultType)"
+        let parameterName = (parameters
+            .map { "\($0.name)\($0.type)" }
+            .joined(separator: "_") + "_\(resultType)")
+            .replacingOccurrences(of: "?", with: "Optional")
         let parameterPassing = parameters.map { "\($0.name): \($0.name)" }.joined(separator: ", ")
         let unnamedParameterPassing = parameters.map { "\($0.name)" }.joined(separator: ", ")
 
@@ -117,10 +120,20 @@ private func analyse(_ members: MemberAccessExprSyntax) throws -> [(name: String
             guard let name = element.label?.text else {
                 throw DIError.unnamedTupleParameter
             }
-            guard let type = element.expression.as(DeclReferenceExprSyntax.self)?.baseName.text else {
-                throw DIError.invalidTupleParameterType
+            
+            // Expression is a non-optional type
+            if let type = element.expression.as(DeclReferenceExprSyntax.self)?.baseName.text {
+                return (name, type)
             }
-            return (name, type)
+            
+            // Expression is a optional type
+            if let optionalExpr = element.expression.as(OptionalChainingExprSyntax.self) {
+                if let type = optionalExpr.expression.as(DeclReferenceExprSyntax.self)?.baseName.text {
+                    return (name, "\(type)?")
+                }
+            }
+            
+            throw DIError.invalidTupleParameterType
         }
     }
     throw DIError.invalidSyntax
@@ -163,7 +176,7 @@ enum DIError: Error, CustomStringConvertible {
         case .unnamedTupleParameter: "Tuple parameters should be named. i.e. (Int, String) to (age: Int, name: String)"
         case .invalidClass: "Macro should be used on a subclass of Dependo."
         case .invalidInjectDependo: "#resolve(param.Type) should get a Dependo subclass Type as a parameter."
-        case .sharedMacroInvalidClass: "@sharedDependo should be used on a Dependo subclass."
+        case .sharedMacroInvalidClass: "@shared should be used on a Dependo subclass."
         }
     }
 }
