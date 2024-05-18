@@ -16,12 +16,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build
+    - name: Build Dependo
       run: swift build -v
     - name: Run Dependo tests
       run: swift test --enable-code-coverage
     - name: Prepare Code Coverage for Dependo
       run: xcrun llvm-cov export -format="lcov" .build/debug/DependoPackageTests.xctest/Contents/MacOS/DependoPackageTests  -instr-profile .build/debug/codecov/default.profdata > dependo.lcov
+    - name: Build Dependo Example
+      run: (cd Example; swift build -v)
     - name: Run Dependo Example tests
       run: (cd Example; swift test --enable-code-coverage)
     - name: Prepare Code Coverage for Dependo Example
