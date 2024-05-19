@@ -26,7 +26,7 @@ let package = Package(
             targets: ["MyPackage"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/agiokas/Dependo", .upToNextMajor(from: "0.2"))
+        .package(url: "https://github.com/agiokas/Dependo", .upToNextMajor(from: "0.2.0"))
     ],
     targets: [
         .target(
