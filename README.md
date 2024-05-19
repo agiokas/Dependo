@@ -46,7 +46,7 @@ While there are multiple ways to use Dependo. In order to take advantage of the 
 
 ```swift
 import Dependo
-
+import DependoMacro
 
 @shared
 final class MyDI: Dependo {}
