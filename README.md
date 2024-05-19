@@ -1,6 +1,6 @@
 # Dependo
 
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fagiokas%2FDependo%2Fbadge%3Fref%3Dmain%26style=flat)](https://actions-badge.atrox.dev/agiokas/Dependo/goto?ref=main)
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fagiokas%2FDependo%2Fbadge%3Fref%3Dmain%26&style=flat)](https://actions-badge.atrox.dev/agiokas/Dependo/goto?ref=main)
 [![codecov](https://codecov.io/gh/agiokas/Dependo/graph/badge.svg)](https://codecov.io/gh/agiokas/Dependo)
 
 **Dependo** is a lightweight, thread safe Dependency Injection library written in swift.
