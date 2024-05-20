@@ -26,7 +26,7 @@ let package = Package(
             targets: ["MyPackage"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/agiokas/Dependo", .upToNextMajor(from: "0.2.0"))
+        .package(url: "https://github.com/agiokas/Dependo", .upToNextMajor(from: "0.2.1"))
     ],
     targets: [
         .target(
@@ -100,15 +100,25 @@ class ExampleViewModel{
 
 ```
 
-> **Warning**: Any `.resolve()` and every registration of a Type which is already registered will fail with a fatal error. This is intentional, as it is considered a programming error that should be fixed rather than handled at runtime.
->
-To avoid this error, ensure that you only register each type once.
+> **Warning**: Any `.resolve` for a Type which is not registere will fail with a fatal error. This is intentional, as it is considered a programming error that should be fixed rather than handled at runtime.
 
-Registering the same type multiple times will result in a fatal error.: 
+```swift
+di.register(MyType.self) { _ in MyTypeImplementation() }
+let t: MyType2 = di.resolve()
+```
+
+To avoid this error, ensure that you only resolve registered types.
+
+> **Warning**: Every `.register` of a Type which is already registered will fail with a fatal error. This is intentional, as it is considered a programming error that should be fixed rather than handled at runtime.
+>
 ```swift
 di.register(MyType.self) { _ in MyTypeImplementation() }
 di.register(MyType.self) { _ in MyTypeImplementation() }
 ```
+
+To avoid this error, ensure that you only register each type once.
+
+
 
 ## Contributing
 
